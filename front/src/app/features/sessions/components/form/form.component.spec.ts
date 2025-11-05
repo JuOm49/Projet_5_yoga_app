@@ -1,33 +1,63 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Router } from '@angular/router';
+
+import { of, Observable } from 'rxjs';
+
 import { expect } from '@jest/globals';
-import { of } from 'rxjs';
+
 import { SessionService } from '../../../../services/session.service';
 import { TeacherService } from '../../../../services/teacher.service';
 import { SessionApiService } from '../../services/session-api.service';
+import { SessionInformation } from '../../../../interfaces/sessionInformation.interface';
+import { Teacher } from '../../../../interfaces/teacher.interface';
+import { Session } from '../../interfaces/session.interface';
+
 import { FormComponent } from './form.component';
+
+// types for mocks
+type MockSessionService = {
+  sessionInformation: SessionInformation | undefined;
+};
+
+type MockTeacherService = {
+  all: jest.Mock<Observable<Teacher[]>>;
+};
+
+type MockSessionApiService = {
+  detail: jest.Mock<Observable<Session>>;
+  create: jest.Mock<Observable<Session>>;
+  update: jest.Mock<Observable<Session>>;
+};
 
 describe('FormComponent', () => {
   let component: FormComponent;
   let fixture: ComponentFixture<FormComponent>;
   let router: Router;
-  let mockSessionService: any;
-  let mockTeacherService: any;
-  let mockSessionApiService: any;
+  let matSnackBar: MatSnackBar;
+  let mockSessionService: MockSessionService;
+  let mockTeacherService: MockTeacherService;
+  let mockSessionApiService: MockSessionApiService;
 
   beforeEach(async () => {
+
     // init mocks
     mockSessionService = {
       sessionInformation: {
+        token: 'test-token',
+        type: 'Bearer',
+        id: 1,
+        username: 'testuser',
+        firstName: 'Test',
+        lastName: 'User',
         admin: true
       }
     };
@@ -48,7 +78,17 @@ describe('FormComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [FormComponent],
       imports: [
-        RouterTestingModule,
+        RouterTestingModule.withRoutes([
+          { path: '', redirectTo: '/sessions', pathMatch: 'full' },
+          { path: 'login', component: FormComponent },
+          { path: 'register', component: FormComponent },
+          { path: 'sessions', component: FormComponent },
+          { path: 'sessions/detail/:id', component: FormComponent },
+          { path: 'sessions/create', component: FormComponent },
+          { path: 'sessions/update/:id', component: FormComponent },
+          { path: 'me', component: FormComponent },
+          { path: '**', redirectTo: '/sessions' }
+        ]),
         ReactiveFormsModule,
         MatCardModule,
         MatIconModule,
@@ -68,7 +108,9 @@ describe('FormComponent', () => {
     fixture = TestBed.createComponent(FormComponent);
     component = fixture.componentInstance;
     router = TestBed.inject(Router);
+    matSnackBar = TestBed.inject(MatSnackBar);
     jest.spyOn(router, 'navigate');
+    jest.spyOn(matSnackBar, 'open');
   });
 
   describe('Component Initialization', () => {
@@ -89,7 +131,9 @@ describe('FormComponent', () => {
   describe('Admin Access Control', () => {
     it('should allow access for admin users', () => {
       // ARRANGE
-      mockSessionService.sessionInformation.admin = true;
+      if (mockSessionService.sessionInformation) {
+        mockSessionService.sessionInformation.admin = true;
+      }
       
       // ACT
       component.ngOnInit();
@@ -100,7 +144,9 @@ describe('FormComponent', () => {
 
     it('should redirect non-admin users to sessions page', () => {
       // ARRANGE
-      mockSessionService.sessionInformation.admin = false;
+      if (mockSessionService.sessionInformation) {
+        mockSessionService.sessionInformation.admin = false;
+      }
       
       // ACT
       component.ngOnInit();
@@ -112,8 +158,10 @@ describe('FormComponent', () => {
 
   describe('Form Initialization', () => {
     beforeEach(() => {
-      // S'assurer que l'utilisateur est admin pour ces tests
-      mockSessionService.sessionInformation.admin = true;
+      // Ensure admin access for these tests
+      if (mockSessionService.sessionInformation) {
+        mockSessionService.sessionInformation.admin = true;
+      }
     });
 
     it('should initialize form with empty values for new session', () => {
@@ -158,9 +206,10 @@ describe('FormComponent', () => {
     mockSessionApiService.detail.mockReturnValue(of({
       id: 1,
       name: 'Test Session',
-      date: '2025-12-01',
+      date: new Date('2025-12-01'),
       teacher_id: 1,
-      description: 'A test session'
+      description: 'A test session',
+      users: [1, 2, 3]
     }));  
     // ACT
     component.ngOnInit();
@@ -174,9 +223,10 @@ describe('FormComponent', () => {
     mockSessionApiService.detail.mockReturnValue(of({
       id: 1,
       name: 'Test Session',
-      date: '2025-12-01',
+      date: new Date('2025-12-01'),
       teacher_id: 1,
-      description: 'A test session'
+      description: 'A test session',
+      users: [1, 2, 3]
     }));
     // ACT
     component.ngOnInit();
@@ -191,11 +241,15 @@ describe('FormComponent', () => {
 });
 
   describe('Form Submission', () => {
-    it('should validate form as valid when properly filled', () => {
-      // ARRANGE
+    beforeEach(() => {
+      if (mockSessionService.sessionInformation) {
+        mockSessionService.sessionInformation.admin = true;
+      }
       component.ngOnInit();
-      
-      // ACT
+    });
+
+    it('should validate form as valid when properly filled', () => {
+      // ARRANGE & ACT
       component.sessionForm?.patchValue({
         name: 'Yoga Session',
         date: '2025-12-06',
@@ -206,5 +260,144 @@ describe('FormComponent', () => {
       // ASSERT
       expect(component.sessionForm?.valid).toBe(true);
     });
+
+    it('should not validate form when required fields are missing', () => {
+      // ARRANGE & ACT
+      component.sessionForm?.patchValue({
+        name: '',
+        date: '',
+        teacher_id: '',
+        description: ''
+      });
+
+      // ASSERT
+      expect(component.sessionForm?.valid).toBe(false);
+      expect(mockSessionApiService.create).not.toHaveBeenCalled();
+      expect(mockSessionApiService.update).not.toHaveBeenCalled();
+      expect(matSnackBar.open).not.toHaveBeenCalled();
+      expect(router.navigate).not.toHaveBeenCalled();
+    });
+
+    it('should create new session when not in update mode', () => {
+      // ARRANGE
+      const mockSession = { 
+        name: 'Test', 
+        date: new Date('2025-12-01'), 
+        teacher_id: 1, 
+        description: 'Test',
+        users: []
+      };
+      mockSessionApiService.create.mockReturnValue(of(mockSession));
+      component.sessionForm?.patchValue({
+        name: mockSession.name,
+        date: '2025-12-01',
+        teacher_id: mockSession.teacher_id.toString(),
+        description: mockSession.description
+      });
+      component.onUpdate = false;
+      
+      // ACT
+      component.submit();
+
+      // ASSERT
+      expect(mockSessionApiService.create).toHaveBeenCalledWith({
+        name: 'Test',
+        date: '2025-12-01',
+        teacher_id: '1',
+        description: 'Test'
+      });
+    });
+
+    it('should update existing session when in update mode', () => {
+      // ARRANGE
+      const mockSession = { 
+        name: 'Updated', 
+        date: new Date('2025-12-01'), 
+        teacher_id: 1, 
+        description: 'Updated',
+        users: []
+      };
+      mockSessionApiService.update.mockReturnValue(of(mockSession));
+      component.sessionForm?.patchValue({
+        name: mockSession.name,
+        date: '2025-12-01',
+        teacher_id: mockSession.teacher_id.toString(),
+        description: mockSession.description
+      });
+      component.onUpdate = true;
+      component['id'] = '1';
+      
+      // ACT
+      component.submit();
+
+      // ASSERT
+      expect(mockSessionApiService.update).toHaveBeenCalledWith('1', {
+        name: 'Updated',
+        date: '2025-12-01',
+        teacher_id: '1',
+        description: 'Updated'
+      });
+    });
+
+    it('should handle submit when sessionForm is undefined', () => {
+      // ARRANGE
+      component.sessionForm = undefined;  
+      // ACT & ASSERT
+      expect(() => component.submit()).toThrow('Cannot read properties of undefined');
+    });
+
+    it('should show success message and redirect after creating session', () => {
+      // ARRANGE
+      const mockSession = { 
+        name: 'Test', 
+        date: new Date('2025-12-01'), 
+        teacher_id: 1, 
+        description: 'Test',
+        users: []
+      };
+      mockSessionApiService.create.mockReturnValue(of(mockSession));
+      component.sessionForm?.patchValue({
+        name: mockSession.name,
+        date: '2025-12-01',
+        teacher_id: mockSession.teacher_id.toString(),
+        description: mockSession.description
+      });
+      component.onUpdate = false;
+      
+      // ACT
+      component.submit();
+
+      // ASSERT
+      expect(matSnackBar.open).toHaveBeenCalledWith('Session created !', 'Close', { duration: 3000 });
+      expect(router.navigate).toHaveBeenCalledWith(['sessions']);
+    });
+
+    it('should show success message and redirect after updating session', () => {
+      // ARRANGE
+      const mockSession = { 
+        name: 'Updated', 
+        date: new Date('2025-12-01'), 
+        teacher_id: 1, 
+        description: 'Updated',
+        users: []
+      };
+      mockSessionApiService.update.mockReturnValue(of(mockSession));
+      component.sessionForm?.patchValue({
+        name: mockSession.name,
+        date: '2025-12-01',
+        teacher_id: mockSession.teacher_id.toString(),
+        description: mockSession.description
+      });
+      component.onUpdate = true;
+      component['id'] = '1';
+      
+      // ACT
+      component.submit();
+
+      // ASSERT
+      expect(matSnackBar.open).toHaveBeenCalledWith('Session updated !', 'Close', { duration: 3000 });
+      expect(router.navigate).toHaveBeenCalledWith(['sessions']);
+    });
+
   });
 });  

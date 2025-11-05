@@ -9,13 +9,14 @@ import { Router } from '@angular/router';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
+import { of } from 'rxjs';
+
 import { SessionService } from 'src/app/services/session.service';
 import { UserService } from 'src/app/services/user.service';
 
 import { expect } from '@jest/globals';
 
 import { MeComponent } from './me.component';
-import { of } from 'rxjs';
 
 describe('MeComponent', () => {
   let component: MeComponent;
@@ -36,9 +37,6 @@ describe('MeComponent', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-
-    // delete warnings for navigation outside Angular zone
-    jest.spyOn(console, 'warn').mockImplementation(() => {});
 
     // Mock window.history.back
     Object.defineProperty(window, 'history', {
