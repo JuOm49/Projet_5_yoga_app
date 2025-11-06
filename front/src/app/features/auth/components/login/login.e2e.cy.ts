@@ -1,13 +1,16 @@
-describe('Login spec', () => {
+/// <reference types="cypress" />
+
+// e2e test for login functionality
+describe('connection user with valid credentials and navigate to sessions', () => {
   it('Login successfull', () => {
     cy.visit('/login')
 
     cy.intercept('POST', '/api/auth/login', {
       body: {
         id: 1,
-        username: 'userName',
-        firstName: 'firstName',
-        lastName: 'lastName',
+        username: 'YogaStudio',
+        firstName: 'Yoga',
+        lastName: 'Studio',
         admin: true
       },
     })

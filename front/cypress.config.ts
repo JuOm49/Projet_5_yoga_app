@@ -6,11 +6,14 @@ export default defineConfig({
   fixturesFolder: 'cypress/fixtures',
   video: false,
   e2e: {
-    // We've imported your old cypress plugins here.
-    // You may want to clean this up later by importing these.
     setupNodeEvents(on, config) {
       return require('./cypress/plugins/index.ts').default(on, config)
     },
-    baseUrl: 'http://localhost:4200',
+    specPattern: [
+      'cypress/e2e/**/*.cy.{js,ts}',
+      'src/**/*.integration.cy.{js,ts}',
+      'src/**/*.e2e.cy.{js,ts}'
+    ],
+    baseUrl: 'http://localhost:59652'
   },
 })
