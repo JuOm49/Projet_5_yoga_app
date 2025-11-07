@@ -282,7 +282,7 @@ describe('FormComponent', () => {
       // ARRANGE
       const mockSession = { 
         name: 'Test', 
-        date: new Date('2025-12-01'), 
+        date: new Date('2025-11-12'), 
         teacher_id: 1, 
         description: 'Test',
         users: []
@@ -290,7 +290,7 @@ describe('FormComponent', () => {
       mockSessionApiService.create.mockReturnValue(of(mockSession));
       component.sessionForm?.patchValue({
         name: mockSession.name,
-        date: '2025-12-01',
+        date: '2025-11-12',
         teacher_id: mockSession.teacher_id.toString(),
         description: mockSession.description
       });
@@ -302,7 +302,7 @@ describe('FormComponent', () => {
       // ASSERT
       expect(mockSessionApiService.create).toHaveBeenCalledWith({
         name: 'Test',
-        date: '2025-12-01',
+        date: '2025-11-12',
         teacher_id: '1',
         description: 'Test'
       });
