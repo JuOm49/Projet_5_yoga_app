@@ -14,6 +14,6 @@ export default defineConfig({
       'src/**/*.integration.cy.{js,ts}',
       'src/**/*.e2e.cy.{js,ts}'
     ],
-    baseUrl: 'http://localhost:59652'
+    baseUrl: 'http://localhost:4200'
   },
 })

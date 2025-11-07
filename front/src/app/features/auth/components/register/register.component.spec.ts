@@ -120,19 +120,6 @@ describe('form validation', () => {
       expect(isValid).toBeFalsy();
     });
 
-    // it('should mark the form as invalid when firstName is too long', () => {
-    //   //ARRANGE
-    //   const formGroup = component.form;
-    //   formGroup.controls['email'].setValue('test.user@test.com');
-    //   formGroup.controls['firstName'].setValue('25');
-    //   formGroup.controls['lastName'].setValue('Test');
-    //   formGroup.controls['password'].setValue('password123');
-    //   //ACT
-    //   const isValid = formGroup.valid;
-    //   //ASSERT
-    //   expect(isValid).toBeFalsy();
-    // });
-
     it('should mark the form as invalid when lastName is missing', () => {
       //ARRANGE
       const formGroup = component.form;
