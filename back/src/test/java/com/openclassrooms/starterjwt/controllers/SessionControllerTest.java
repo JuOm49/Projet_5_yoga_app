@@ -1,5 +1,6 @@
 package com.openclassrooms.starterjwt.controllers;
 
+import com.openclassrooms.starterjwt.dto.SessionDto;
 import com.openclassrooms.starterjwt.mapper.SessionMapper;
 import com.openclassrooms.starterjwt.models.Session;
 import com.openclassrooms.starterjwt.models.Teacher;
@@ -72,6 +73,35 @@ public class SessionControllerTest {
 
         verify(sessionService).getById(sessionId);
         verify(sessionMapper).toDto(session);
+    }
+
+    @Test
+    void findById_shouldReturnNotFound_whenSessionDoesNotExist() {
+        //ARRANGE
+        String id = "99";
+        Long sessionId = 99L;
+
+        when(sessionService.getById(sessionId)).thenReturn(null);
+
+        //ACT
+        ResponseEntity<?> response = sessionController.findById(id);
+
+        //ASSERT
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getBody()).isNull();
+    }
+
+    @Test
+    void findById_shouldReturnBadRequest_whenIdIsNotNumeric() {
+        //ARRANGE
+        String id = "invalid";
+
+        //ACT
+        ResponseEntity<?> response = sessionController.findById(id);
+
+        //ASSERT
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        assertThat(response.getBody()).isNull();
     }
 
     @Test

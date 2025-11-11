@@ -1,5 +1,6 @@
 package com.openclassrooms.starterjwt.controllers;
 
+import com.openclassrooms.starterjwt.dto.TeacherDto;
 import com.openclassrooms.starterjwt.mapper.TeacherMapper;
 import com.openclassrooms.starterjwt.models.Teacher;
 import com.openclassrooms.starterjwt.services.TeacherService;
@@ -115,7 +116,6 @@ public class TeacherControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isInstanceOf(List.class);
 
-        @SuppressWarnings("unchecked")
         List<TeacherDto> responseBody = (List<TeacherDto>) response.getBody();
         assertThat(responseBody).hasSize(1);
         assertThat(responseBody.get(0).getId()).isEqualTo(1L);
@@ -126,13 +126,48 @@ public class TeacherControllerTest {
         verify(teacherMapper).toDto(teachers);
     }
 
+    @Test
+    void findAll_shouldReturnListOfTeacherDto_whenTeachersExist() {
+        //ARRANGE
+        List<Teacher> teachers = Arrays.asList(teacherTest(), teacherTest());
+        List<TeacherDto> teacherDtos = Arrays.asList(teacherDtoTest(), teacherDtoTest());
+        when(teacherService.findAll()).thenReturn(teachers);
+        when(teacherMapper.toDto(teachers)).thenReturn(teacherDtos);
+
+        //ACT
+        ResponseEntity<?> response = teacherController.findAll();
+
+        //ASSERT
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isInstanceOf(List.class);
+        List<TeacherDto> responseBody = (List<TeacherDto>) response.getBody();
+        assertThat(responseBody).hasSize(2);
+    }
+
+    @Test
+    void findAll_shouldReturnEmptyList_whenNoTeachersExist() {
+        //ARRANGE
+        when(teacherService.findAll()).thenReturn(Arrays.asList());
+        when(teacherMapper.toDto(Arrays.asList())).thenReturn(Arrays.asList());
+
+        //ACT
+        ResponseEntity<?> response = teacherController.findAll();
+
+        //ASSERT
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isInstanceOf(List.class);
+
+        List<TeacherDto> responseBody = (List<TeacherDto>) response.getBody();
+        assertThat(responseBody).isEmpty();
+    }
+
     private TeacherDto teacherDtoTest() {
         TeacherDto teacherDto = new TeacherDto();
         teacherDto.setId(1L);
         teacherDto.setFirstName("Mario");
         teacherDto.setLastName("Castello");
-        teacherDto.setCreatedAt(LocalDateTime.parse("2025-08-05T10:00:00"));
-        teacherDto.setUpdatedAt(LocalDateTime.parse("2025-08-05T10:00:00"));
+        teacherDto.setCreatedAt(LocalDateTime.parse("2025-07-05T10:00:00"));
+        teacherDto.setUpdatedAt(LocalDateTime.parse("2025-08-10T10:00:00"));
         return teacherDto;
     }
 
@@ -141,8 +176,8 @@ public class TeacherControllerTest {
         teacher.setId(1L);
         teacher.setFirstName("Mario");
         teacher.setLastName("Castello");
-        teacher.setCreatedAt(LocalDateTime.parse("2025-08-05T10:00:00"));
-        teacher.setUpdatedAt(LocalDateTime.parse("2025-08-05T10:00:00"));
+        teacher.setCreatedAt(LocalDateTime.parse("2025-07-05T10:00:00"));
+        teacher.setUpdatedAt(LocalDateTime.parse("2025-08-10T10:00:00"));
         return teacher;
     }
 }

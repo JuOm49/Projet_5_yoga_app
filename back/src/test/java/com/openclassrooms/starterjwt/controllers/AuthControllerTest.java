@@ -148,6 +148,37 @@ public class AuthControllerTest {
     }
 
     @Test
+    void registerUser_shouldReturnBadRequest_whenEmailAlreadyExists() {
+        SignupRequest signupRequest = new SignupRequest();
+        signupRequest.setEmail("existing@gmail.com");
+        signupRequest.setPassword("password");
+        signupRequest.setFirstName("Test");
+        signupRequest.setLastName("User");
+        when(userRepository.existsByEmail("existing@gmail.com")).thenReturn(true);
+        ResponseEntity<?> response = authController.registerUser(signupRequest);
+        assertThat(response.getStatusCodeValue()).isEqualTo(400);
+        assertThat(response.getBody()).isInstanceOf(MessageResponse.class);
+        MessageResponse body = (MessageResponse) response.getBody();
+        assertThat(body.getMessage()).contains("Error: Email is already taken!");
+    }
+
+    @Test
+    void registerUser_shouldReturnOk_whenUserIsRegistered() {
+        SignupRequest signupRequest = new SignupRequest();
+        signupRequest.setEmail("newuser@gmail.com");
+        signupRequest.setPassword("password");
+        signupRequest.setFirstName("New");
+        signupRequest.setLastName("User");
+        when(userRepository.existsByEmail("newuser@gmail.com")).thenReturn(false);
+        when(passwordEncoder.encode("password")).thenReturn("encodedPassword");
+        ResponseEntity<?> response = authController.registerUser(signupRequest);
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+        assertThat(response.getBody()).isInstanceOf(MessageResponse.class);
+        MessageResponse body = (MessageResponse) response.getBody();
+        assertThat(body.getMessage()).contains("User registered successfully!");
+    }
+
+    @Test
     void registerUser_ShouldReturnErrorMessage_WhenEmailAlreadyExists() {
         //ARRANGE
         SignupRequest signupRequest = new SignupRequest();
