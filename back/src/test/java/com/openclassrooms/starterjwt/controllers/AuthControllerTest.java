@@ -36,13 +36,10 @@ public class AuthControllerTest {
 
     @Mock
     private AuthenticationManager authenticationManager;
-
     @Mock
     private JwtUtils jwtUtils;
-
     @Mock
     private PasswordEncoder passwordEncoder;
-
     @Mock
     private UserRepository userRepository;
 
@@ -177,12 +174,12 @@ public class AuthControllerTest {
     void registerUser_ShouldReturnBadRequest_WhenEmailAlreadyExists() {
         //ARRANGE
         SignupRequest signupRequest = new SignupRequest();
-        signupRequest.setEmail("duplicate@email.com");
-        signupRequest.setFirstName("Jane");
-        signupRequest.setLastName("Smith");
+        signupRequest.setEmail("duplicate.email@email.com");
+        signupRequest.setFirstName("Emilie");
+        signupRequest.setLastName("Lopez");
         signupRequest.setPassword("SecurePassword123");
 
-        when(userRepository.existsByEmail("duplicate@email.com")).thenReturn(true);
+        when(userRepository.existsByEmail("duplicate.email@email.com")).thenReturn(true);
 
         //ACT
         ResponseEntity<?> response = authController.registerUser(signupRequest);
@@ -200,20 +197,20 @@ public class AuthControllerTest {
     void registerUser_ShouldReturnSuccess_WhenAllDataIsValid() {
         //ARRANGE
         SignupRequest signupRequest = new SignupRequest();
-        signupRequest.setEmail("newuser@email.com");
+        signupRequest.setEmail("new.user@gmail.com");
         signupRequest.setFirstName("Alice");
-        signupRequest.setLastName("Johnson");
+        signupRequest.setLastName("Fabian");
         signupRequest.setPassword("ValidPassword123");
 
         User savedUser = new User(
-                "newuser@email.com",
-                "Johnson",
+                "new.user@gmail.com",
+                "Fabian",
                 "Alice",
                 "encoded-password",
                 false
         );
 
-        when(userRepository.existsByEmail("newuser@email.com")).thenReturn(false);
+        when(userRepository.existsByEmail("new.user@gmail.com")).thenReturn(false);
         when(passwordEncoder.encode("ValidPassword123")).thenReturn("encoded-password");
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
