@@ -1,5 +1,6 @@
 package com.openclassrooms.starterjwt.controllers;
 
+import com.openclassrooms.starterjwt.dto.UserDto;
 import com.openclassrooms.starterjwt.mapper.UserMapper;
 import com.openclassrooms.starterjwt.models.User;
 import com.openclassrooms.starterjwt.services.UserService;
@@ -72,9 +73,9 @@ public class UserControllerTest {
             throw new AssertionError("Response body is null");
         }
         assertThat(responseBody.getId()).isEqualTo(1L);
-        assertThat(responseBody.getEmail()).isEqualTo("test@example.com");
-        assertThat(responseBody.getFirstName()).isEqualTo("John");
-        assertThat(responseBody.getLastName()).isEqualTo("Doe");
+        assertThat(responseBody.getEmail()).isEqualTo("philippe.montand@orange.fr");
+        assertThat(responseBody.getFirstName()).isEqualTo("Philippe");
+        assertThat(responseBody.getLastName()).isEqualTo("Montand");
 
         verify(userService).findById(userId);
         verify(userMapper).toDto(user);
@@ -117,7 +118,7 @@ public class UserControllerTest {
         String id = "1";
         Long userId = 1L;
         User user = userTest();
-        String userEmail = "test@example.com";
+        String userEmail = "julien.richard@outlook.com";
 
         when(userService.findById(userId)).thenReturn(user);
         when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -162,7 +163,7 @@ public class UserControllerTest {
         String id = "1";
         Long userId = 1L;
         User user = userTest();
-        String differentUserEmail = "different@example.com";
+        String differentUserEmail = "different@email.fr";
 
         when(userService.findById(userId)).thenReturn(user);
         when(securityContext.getAuthentication()).thenReturn(authentication);
@@ -201,25 +202,25 @@ public class UserControllerTest {
     private UserDto userDtoTest() {
         UserDto userDto = new UserDto();
         userDto.setId(1L);
-        userDto.setEmail("test@example.com");
-        userDto.setFirstName("John");
-        userDto.setLastName("Doe");
+        userDto.setEmail("philippe.montand@orange.fr");
+        userDto.setFirstName("Philippe");
+        userDto.setLastName("Montand");
         userDto.setAdmin(false);
-        userDto.setCreatedAt(LocalDateTime.parse("2025-08-05T10:00:00"));
-        userDto.setUpdatedAt(LocalDateTime.parse("2025-08-05T10:00:00"));
+        userDto.setCreatedAt(LocalDateTime.parse("2025-11-05T10:00:00"));
+        userDto.setUpdatedAt(LocalDateTime.parse("2025-11-05T10:00:00"));
         return userDto;
     }
 
     private User userTest() {
         User user = new User();
         user.setId(1L);
-        user.setEmail("test@example.com");
-        user.setFirstName("John");
-        user.setLastName("Doe");
+        user.setEmail("julien.richard@outlook.com");
+        user.setFirstName("Julien");
+        user.setLastName("Richard");
         user.setAdmin(false);
         user.setPassword("hashedPassword");
-        user.setCreatedAt(LocalDateTime.parse("2025-08-05T10:00:00"));
-        user.setUpdatedAt(LocalDateTime.parse("2025-08-05T10:00:00"));
+        user.setCreatedAt(LocalDateTime.parse("2025-11-04T10:00:00"));
+        user.setUpdatedAt(LocalDateTime.parse("2025-11-05T10:00:00"));
         return user;
     }
 }

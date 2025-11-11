@@ -14,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,27 +30,37 @@ public class TeacherServiceTest {
 
     @BeforeEach
     void setUp() {
-        teacher = new Teacher();
-        teacher.setId(1L);
-        teacher.setFirstName("John");
-        teacher.setLastName("Doe");
-        teacher.setCreatedAt(LocalDateTime.now());
-        teacher.setUpdatedAt(LocalDateTime.now());
+        teacher = Teacher.builder()
+                .id(1L)
+                .firstName("Jacques")
+                .lastName("Dupont")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
     }
 
     @Test
     void findAll_shouldReturnAllTeachers() {
         // ARRANGE
-        List<Teacher> teachers = Arrays.asList(teacher);
+        Teacher teacher2 = Teacher.builder()
+                .id(2L)
+                .firstName("Danise")
+                .lastName("Fouceaud")
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        List<Teacher> teachers = Arrays.asList(teacher, teacher2);
         when(teacherRepository.findAll()).thenReturn(teachers);
 
         // ACT
         List<Teacher> result = teacherService.findAll();
 
         // ASSERT
-        assertThat(result).isEqualTo(teachers);
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getFirstName()).isEqualTo("John");
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        assertEquals(teacher.getId(), result.get(0).getId());
+        assertEquals(teacher2.getId(), result.get(1).getId());
         verify(teacherRepository).findAll();
     }
 
@@ -63,12 +73,13 @@ public class TeacherServiceTest {
         List<Teacher> result = teacherService.findAll();
 
         // ASSERT
-        assertThat(result).isEmpty();
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
         verify(teacherRepository).findAll();
     }
 
     @Test
-    void findById_shouldReturnTeacher_whenExists() {
+    void findById_shouldReturnTeacher_whenTeacherExists() {
         // ARRANGE
         when(teacherRepository.findById(1L)).thenReturn(Optional.of(teacher));
 
@@ -76,15 +87,15 @@ public class TeacherServiceTest {
         Teacher result = teacherService.findById(1L);
 
         // ASSERT
-        assertThat(result).isEqualTo(teacher);
-        assertThat(result.getId()).isEqualTo(1L);
-        assertThat(result.getFirstName()).isEqualTo("John");
-        assertThat(result.getLastName()).isEqualTo("Doe");
+        assertNotNull(result);
+        assertEquals(teacher.getId(), result.getId());
+        assertEquals(teacher.getFirstName(), result.getFirstName());
+        assertEquals(teacher.getLastName(), result.getLastName());
         verify(teacherRepository).findById(1L);
     }
 
     @Test
-    void findById_shouldReturnNull_whenNotExists() {
+    void findById_shouldReturnNull_whenTeacherDoesNotExist() {
         // ARRANGE
         when(teacherRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -92,7 +103,43 @@ public class TeacherServiceTest {
         Teacher result = teacherService.findById(1L);
 
         // ASSERT
-        assertThat(result).isNull();
+        assertNull(result);
         verify(teacherRepository).findById(1L);
+    }
+
+    @Test
+    void findById_shouldReturnNull_whenIdIsNull() {
+        // ACT
+        Teacher result = teacherService.findById(null);
+
+        // ASSERT
+        assertNull(result);
+        verify(teacherRepository).findById(null);
+    }
+
+    @Test
+    void findById_shouldHandleNegativeId() {
+        // ARRANGE
+        when(teacherRepository.findById(-1L)).thenReturn(Optional.empty());
+
+        // ACT
+        Teacher result = teacherService.findById(-1L);
+
+        // ASSERT
+        assertNull(result);
+        verify(teacherRepository).findById(-1L);
+    }
+
+    @Test
+    void findById_shouldHandleZeroId() {
+        // ARRANGE
+        when(teacherRepository.findById(0L)).thenReturn(Optional.empty());
+
+        // ACT
+        Teacher result = teacherService.findById(0L);
+
+        // ASSERT
+        assertNull(result);
+        verify(teacherRepository).findById(0L);
     }
 }

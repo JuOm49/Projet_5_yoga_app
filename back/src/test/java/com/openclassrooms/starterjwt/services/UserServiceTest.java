@@ -12,7 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,43 +28,65 @@ public class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        user = new User();
-        user.setId(1L);
-        user.setEmail("test@test.com");
-        user.setFirstName("Test");
-        user.setLastName("User");
-        user.setPassword("password");
-        user.setAdmin(false);
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
+        user = User.builder()
+                .id(1L)
+                .email("aurelie.darand@test.com")
+                .firstName("Aurélie")
+                .lastName("Darand")
+                .password("password123")
+                .admin(false)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
     }
 
     @Test
     void delete_shouldCallRepositoryDeleteById() {
         // ARRANGE
-        Long id = 1L;
+        Long userId = 1L;
 
         // ACT
-        userService.delete(id);
+        userService.delete(userId);
 
         // ASSERT
-        verify(userRepository).deleteById(id);
+        verify(userRepository).deleteById(userId);
     }
 
     @Test
-    void delete_shouldCallRepositoryDeleteById_withDifferentId() {
+    void delete_shouldCallRepositoryDeleteById_whenIdIsNull() {
+        // ACT
+        userService.delete(null);
+
+        // ASSERT
+        verify(userRepository).deleteById(null);
+    }
+
+    @Test
+    void delete_shouldCallRepositoryDeleteById_whenIdIsZero() {
         // ARRANGE
-        Long id = 999L;
+        Long userId = 0L;
 
         // ACT
-        userService.delete(id);
+        userService.delete(userId);
 
         // ASSERT
-        verify(userRepository).deleteById(id);
+        verify(userRepository).deleteById(userId);
     }
 
     @Test
-    void findById_shouldReturnUser_whenExists() {
+    void delete_shouldCallRepositoryDeleteById_whenIdIsNegative() {
+        // ARRANGE
+        Long userId = -1L;
+
+        // ACT
+        userService.delete(userId);
+
+        // ASSERT
+        verify(userRepository).deleteById(userId);
+    }
+
+    @Test
+    void findById_shouldReturnUser_whenUserExists() {
         // ARRANGE
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
@@ -72,17 +94,17 @@ public class UserServiceTest {
         User result = userService.findById(1L);
 
         // ASSERT
-        assertThat(result).isEqualTo(user);
-        assertThat(result.getId()).isEqualTo(1L);
-        assertThat(result.getEmail()).isEqualTo("test@test.com");
-        assertThat(result.getFirstName()).isEqualTo("Test");
-        assertThat(result.getLastName()).isEqualTo("User");
-        assertThat(result.isAdmin()).isFalse();
+        assertNotNull(result);
+        assertEquals(user.getId(), result.getId());
+        assertEquals(user.getEmail(), result.getEmail());
+        assertEquals(user.getFirstName(), result.getFirstName());
+        assertEquals(user.getLastName(), result.getLastName());
+        assertEquals(user.isAdmin(), result.isAdmin());
         verify(userRepository).findById(1L);
     }
 
     @Test
-    void findById_shouldReturnNull_whenNotExists() {
+    void findById_shouldReturnNull_whenUserDoesNotExist() {
         // ARRANGE
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -90,20 +112,70 @@ public class UserServiceTest {
         User result = userService.findById(1L);
 
         // ASSERT
-        assertThat(result).isNull();
+        assertNull(result);
         verify(userRepository).findById(1L);
     }
 
     @Test
     void findById_shouldReturnNull_whenIdIsNull() {
-        // ARRANGE
-        when(userRepository.findById(null)).thenReturn(Optional.empty());
-
         // ACT
         User result = userService.findById(null);
 
         // ASSERT
-        assertThat(result).isNull();
+        assertNull(result);
         verify(userRepository).findById(null);
+    }
+
+    @Test
+    void findById_shouldHandleNegativeId() {
+        // ARRANGE
+        when(userRepository.findById(-1L)).thenReturn(Optional.empty());
+
+        // ACT
+        User result = userService.findById(-1L);
+
+        // ASSERT
+        assertNull(result);
+        verify(userRepository).findById(-1L);
+    }
+
+    @Test
+    void findById_shouldHandleZeroId() {
+        // ARRANGE
+        when(userRepository.findById(0L)).thenReturn(Optional.empty());
+
+        // ACT
+        User result = userService.findById(0L);
+
+        // ASSERT
+        assertNull(result);
+        verify(userRepository).findById(0L);
+    }
+
+    @Test
+    void findById_shouldReturnAdminUser_whenUserIsAdmin() {
+        // ARRANGE
+        User adminUser = User.builder()
+                .id(2L)
+                .email("admin@test.com")
+                .firstName("Admin")
+                .lastName("User")
+                .password("adminpass")
+                .admin(true)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+
+        when(userRepository.findById(2L)).thenReturn(Optional.of(adminUser));
+
+        // ACT
+        User result = userService.findById(2L);
+
+        // ASSERT
+        assertNotNull(result);
+        assertEquals(2L, result.getId());
+        assertEquals("admin@test.com", result.getEmail());
+        assertTrue(result.isAdmin());
+        verify(userRepository).findById(2L);
     }
 }
