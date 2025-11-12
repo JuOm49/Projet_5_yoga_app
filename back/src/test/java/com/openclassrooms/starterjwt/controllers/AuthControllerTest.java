@@ -89,7 +89,7 @@ public class AuthControllerTest {
     }
 
     @Test
-    void authenticateUser_ShouldReturnAdminFalse_WhenUserNotFound() {
+    void authenticateUser_ShouldReturnFalse_WhenUserNotFound() {
         // ARRANGE
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setEmail("unknown@gmail.com");
