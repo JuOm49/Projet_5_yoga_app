@@ -84,8 +84,8 @@ describe('form validation', () => {
     it('should mark the form as valid when filled correctly', () => {
       //ARRANGE
       const formGroup = component.form;
-      formGroup.controls['firstName'].setValue('John');
-      formGroup.controls['lastName'].setValue('Doe');
+      formGroup.controls['firstName'].setValue('Dorian');
+      formGroup.controls['lastName'].setValue('Ducasse');
       formGroup.controls['email'].setValue('test.user@test.com');
       formGroup.controls['password'].setValue('password123');
       //ACT
@@ -124,7 +124,7 @@ describe('form validation', () => {
       //ARRANGE
       const formGroup = component.form;
       formGroup.controls['email'].setValue('test.user@test.com');
-      formGroup.controls['firstName'].setValue('John');
+      formGroup.controls['firstName'].setValue('Dorian');
       formGroup.controls['lastName'].setValue('');
       formGroup.controls['password'].setValue('password123');
       //ACT
