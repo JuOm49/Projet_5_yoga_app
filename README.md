@@ -1,9 +1,8 @@
 # README: YOGA APP
 
+This document explains how to run the Angular project (frontend) and Spring project (backend), run unit tests and run integration tests with coverage on Windows.
+
 ## Front (Angular) — How to run and test
-
-This document explains how to run the Angular frontend, run unit tests and run integration (Cypress) tests with coverage on Windows.
-
 Prerequisites
 - Node.js (>=14 recommended) and npm
 - Angular CLI (optional for local serve): `npm i -g @angular/cli`
