@@ -159,36 +159,29 @@ describe('Me Component Super Simple Integration Tests', () => {
             statusCode: 200,
             body: {}
         }).as('deleteUserApi');
-
-        // Navigate to ME page (session should be set)
-        cy.visit('/me');
-        
-        cy.url().then((url) => {
-            if (url.includes('/me')) {
-                cy.log('SUCCESS: Reached ME page for delete test!');
-                
-                // Wait for user data to load
-                cy.wait('@getUserApi');
-                
-                // Verify we're on ME page
-                cy.get('mat-card').should('exist');
-                
-                // Test delete button click (this EXECUTES delete() method - INCREASES COVERAGE!)
-                cy.get('button[color="warn"]').click();
-                
-                // Wait for delete API call (this tests the actual delete method)
-                cy.wait('@deleteUserApi');
-                
-                // Should redirect to home page after deletion (tests router.navigate)
-                cy.url().should('include', '/');
-                
-                cy.log('Delete method executed successfully!');
-            } else {
-                cy.log('Could not reach ME page - authentication issue persists');
-            }
+        // Navigate to sessions page and use the Account link to reach ME page (preserves session and real UI flow)
+        cy.url().should('include', '/sessions');
+        cy.get('mat-toolbar').within(() => {
+            cy.get('span[routerLink="me"]').should('contain.text', 'Account').click();
         });
-        
-        cy.log('Delete account functionality tested');
+
+        // Now on /me
+        cy.url().should('include', '/me');
+        cy.wait('@getUserApi');
+
+        // Verify we're on ME page
+        cy.get('mat-card').should('exist');
+
+        // Test delete button click (this EXECUTES delete() method - INCREASES COVERAGE!)
+        cy.get('button[color="warn"]').click();
+
+        // Wait for delete API call (this tests the actual delete method)
+        cy.wait('@deleteUserApi');
+
+        // Should redirect to home page after deletion (tests router.navigate)
+        cy.url().should('include', '/');
+
+        cy.log('Delete method executed successfully!');
     });
 
     it('should test back button functionality', () => {
