@@ -1,4 +1,4 @@
-#README YOGA APP
+# README: YOGA APP
 
 ## Front (Angular) — How to run and test
 
