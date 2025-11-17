@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-// e2e test for login functionality
+// test for login functionality
 describe('connection user with valid credentials and navigate to sessions', () => {
   it('Login successfull', () => {
     cy.visit('/login')
