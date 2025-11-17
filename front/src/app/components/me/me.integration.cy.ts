@@ -31,12 +31,28 @@ describe('Me Component Super Simple Integration Tests', () => {
             }
         }).as('getUserApi');
 
+        // Mock sessions list (the app uses GET /api/session for sessions)
+        cy.intercept('GET', '/api/session', {
+            statusCode: 200,
+            body: [
+                {
+                    id: 1,
+                    name: 'Morning Yoga Session',
+                    description: 'A peaceful morning yoga session',
+                    date: '2025-12-15T09:00:00.000Z',
+                    teacher_id: 1,
+                    users: []
+                }
+            ]
+        }).as('sessionsListRequest');
+
         // Login first
         cy.visit('/login');
         cy.get('input[formControlName="email"]').type('yoga@studio.com');
         cy.get('input[formControlName="password"]').type('test!1234');
         cy.get('button[type="submit"]').click();
         cy.wait('@loginRequest');
+        cy.wait('@sessionsListRequest');
         
         // Wait for login to complete and we're on /sessions
         cy.wait(1000);

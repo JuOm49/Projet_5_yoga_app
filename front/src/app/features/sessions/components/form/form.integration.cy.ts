@@ -26,17 +26,33 @@ describe('Session Form Integration Tests', () => {
             ]
         }).as('teachersRequest');
 
+        // Mock sessions list (the app uses GET /api/session for sessions)
+        cy.intercept('GET', '/api/session', {
+            statusCode: 200,
+            body: [
+                {
+                    id: 1,
+                    name: 'Morning Yoga Session',
+                    description: 'A peaceful morning yoga session',
+                    date: '2025-12-15T09:00:00.000Z',
+                    teacher_id: 1,
+                    users: []
+                }
+            ]
+        }).as('sessionsListRequest');
+
         // Login as admin
         cy.visit('/login');
         cy.get('input[formControlName="email"]').type('admin@studio.com');
         cy.get('input[formControlName="password"]').type('test!1234');
         cy.get('button[type="submit"]').click();
         cy.wait('@loginRequest');
+        cy.wait('@sessionsListRequest');
         cy.wait(1000);
     });
 
     it('should test navigation to create session form via real UI', () => {
-        // Navigate to sessions list first  
+        // Navigate to sessions list first
         cy.get('mat-toolbar').within(() => {
             cy.get('span[routerLink="sessions"]').should('contain.text', 'Sessions').click();
         });

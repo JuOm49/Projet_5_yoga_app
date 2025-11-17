@@ -1,4 +1,4 @@
-// e2e test for register and login
+// test for register and login
 describe('save new user with register, then login and access sessions', () => {
   it('Register successful', () => {
     cy.visit('/register')

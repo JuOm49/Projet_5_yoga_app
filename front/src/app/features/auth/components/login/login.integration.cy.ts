@@ -3,6 +3,21 @@
 // Integration tests for Login Component
 describe('Login Component - Integration Tests', () => {
   beforeEach(() => {
+    // Mock sessions list for after login redirection
+    cy.intercept('GET', '/api/session', {
+            statusCode: 200,
+            body: [
+                {
+                    id: 1,
+                    name: 'Morning Yoga Session',
+                    description: 'A peaceful morning yoga session',
+                    date: '2025-12-15T09:00:00.000Z',
+                    teacher_id: 1,
+                    users: []
+                }
+            ]
+        }).as('sessionsListRequest');
+
     // Navigate to http://localhost:4200/login before each test
     cy.visit('/login');
   });
@@ -34,7 +49,7 @@ describe('Login Component - Integration Tests', () => {
     });
   });
 
-  describe('User Authentication - Integration', () => {
+  describe('User Authentication and access to sessions', () => {
     it('should submit form when Enter is pressed in password field', () => {
       // ARRANGE
       cy.intercept('POST', '/api/auth/login', { fixture: 'auth/login-success.json' }).as('loginEnter');
@@ -48,6 +63,7 @@ describe('Login Component - Integration Tests', () => {
 
       // ASSERT - verify submission occurred
       cy.wait('@loginEnter');
+      cy.wait('@sessionsListRequest');
       // Verify redirection to sessions page
       cy.url().should('include', '/sessions');
     });

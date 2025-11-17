@@ -113,6 +113,11 @@ describe('FormComponent', () => {
     jest.spyOn(matSnackBar, 'open');
   });
 
+  // cleanup
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   describe('Component Initialization', () => {
     it('should create the component successfully', () => {
       expect(component).toBeTruthy();
