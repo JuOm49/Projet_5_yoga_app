@@ -65,8 +65,7 @@ public class SessionControllerIT {
         // Mock JWT validation to avoid 401 errors
         when(jwtUtils.validateJwtToken(org.mockito.ArgumentMatchers.anyString())).thenReturn(true);
         when(jwtUtils.getUserNameFromJwtToken(org.mockito.ArgumentMatchers.anyString())).thenReturn("testuser");
-        // Remove all sessions before each test
-        sessionService.findAll().forEach(s -> sessionService.delete(s.getId()));
+
         List<Teacher> teachers = teacherService.findAll();
         if (teachers.isEmpty()) {
             usedTeacher = null;
