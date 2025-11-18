@@ -54,6 +54,7 @@ public class AuthControllerIT {
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
+
     }
 
     @Test

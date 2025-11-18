@@ -94,7 +94,7 @@ public class SessionControllerIT {
 
     @Test
     void findById_shouldReturnSession_whenIdExists() throws Exception {
-        if (usedTeacher == null) return; // Ignore si pas de teacher
+        if (usedTeacher == null) return;
         mockMvc.perform(get("/api/session/" + session.getId())
                 .header("Authorization", "Bearer test.jwt.token"))
                 .andExpect(status().isOk())
