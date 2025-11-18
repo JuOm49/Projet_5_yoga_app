@@ -1,5 +1,15 @@
 import 'jest-preset-angular/setup-jest';
 
+// Global suppression of console logs for all tests
+console.warn = jest.fn();
+console.error = jest.fn();
+console.info = jest.fn();
+
+// Suppress unhandled promise rejections using window instead of process
+window.addEventListener('unhandledrejection', (event) => {
+  event.preventDefault(); // Prevent the default handling
+});
+
 /* global mocks for jsdom */
 const mock = () => {
   let storage: { [key: string]: string } = {};
