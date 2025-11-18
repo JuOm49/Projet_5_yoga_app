@@ -19,13 +19,14 @@ import javax.transaction.Transactional;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
-@WithMockUser(username = "testuser@email.com", roles = {"USER"})
+@WithMockUser(username = "julien.toureau@hotmail.com", roles = {"USER"})
 public class UserControllerIT {
 
     @Autowired
@@ -89,8 +90,10 @@ public class UserControllerIT {
 
     @Test
     void delete_shouldReturnOk_whenUserExistsAndIsOwner() throws Exception {
+        // delete the user
         mockMvc.perform(delete("/api/user/" + savedUser.getId())
-                .header("Authorization", "Bearer token"))
+                .header("Authorization", "Bearer token")
+                .with(csrf()))
                 .andExpect(status().isOk());
 
         // subsequent get should be not found
