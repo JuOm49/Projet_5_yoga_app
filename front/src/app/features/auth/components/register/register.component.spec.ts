@@ -179,9 +179,10 @@ describe('form validation', () => {
         firstName: '',
         lastName: ''
       });
+      expect(router.navigate).toHaveBeenCalledWith(['/login']);
     });
 
-    it('should handle login error and set onError to true', fakeAsync(() => {
+    it('should handle login error and set onError to true', () => {
       //ARRANGE
       component.form.controls['email'].setValue('test.user@test.com');
       component.form.controls['password'].setValue('password123');
@@ -193,12 +194,11 @@ describe('form validation', () => {
       
       //ACT
       component.submit();
-      tick(); // Wait for observable completion
       
       //ASSERT
       expect(component.onError).toBe(true);
       expect(router.navigate).not.toHaveBeenCalled();
-    }));
+    });
 
   });
 });
